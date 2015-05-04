@@ -2,9 +2,23 @@ require 'lol'
 class ProfilesController < ApplicationController
 
   def index
-    @profile = Profile.new( :name => "kithokit")
-    @statsconnection.stats.summary(@profile.summonerid)
-    @win = @stats.detect { |a| a.player_stat_summary_type == "RankedSolo5x5" }.wins
-    @losses = @stats.detect { |a| a.player_stat_summary_type == "RankedSolo5x5" }.losses
+    default_players
+    render "index"
+  end
+
+  def search
+    @profile = Profile.new(:name => params["q"])
+    render "index"
+  end
+
+
+  def default_players
+    players = ["kithokit", "ringopak", "Team Cap", "yamsaihoi"]
+    @profiles = []
+    players.each { |p|
+      profile = Profile.new(:name => p)
+      @profiles << profile
+    }
+    @profiles
   end
 end
