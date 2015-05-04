@@ -1,4 +1,4 @@
-class Profile < ActiveRecord::Base
+class Profile
 
   include Lolconnection
   attr_accessor :summoner_id
@@ -10,21 +10,30 @@ class Profile < ActiveRecord::Base
   attr_accessor :tier
   attr_accessor :onfire
 
+  def initialize name
+    @name = name
+    @summoner_id = summoner_id
+    leagueinfo
+  end
+
   def summoner_id
-    @summoner_id || connection.summoner.by_name(self.name).first.id.to_s rescue nil
+    if @summoner_id.nil?
+      @summoner_id = connection.summoner.by_name(@name)
+      @summoner_id.first.id.to_s
+    end
   end
 
   def leagueinfo
     if @leagueinfo.nil?
-      @leagueinfo = connection.league.get(self.summoner_id)
-      @leagueinfo = @leagueinfo[self.summoner_id].first
+      @leagueinfo = connection.league.get(@summoner_id)
+      @leagueinfo = @leagueinfo[@summoner_id].first
     end
     @leagueinfo
   end
 
   def infodetail
     if @infodetail.nil?
-         @infodetail = leagueinfo.entries.detect { |a| a.player_or_team_id == self.summoner_id }
+         @infodetail = leagueinfo.entries.detect { |a| a.player_or_team_id == @summoner_id }
     end
     @infodetail
   end
@@ -42,10 +51,6 @@ class Profile < ActiveRecord::Base
     unless win.nil? or loss.nil?
       (win.to_f/(win.to_f + loss.to_f)* 100).round(1)
     end
-  end
-
-  def stats
-    @stats || connection.stats.summary(self.summoner_id)
   end
 
   def win

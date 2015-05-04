@@ -7,18 +7,27 @@ class ProfilesController < ApplicationController
   end
 
   def search
-    @profile = Profile.new(:name => params["q"])
-    render "index"
+    players = parse_query params['q']
+    @search_profiles = players.map { |p|
+      Profile.new(p) rescue { :name => p }
+    }
+    index
   end
 
+  def parse_query q
+    players = q.split(";")
+    players
+  end
 
   def default_players
-    players = ["kithokit", "ringopak", "Team Cap", "yamsaihoi"]
-    @profiles = []
-    players.each { |p|
-      profile = Profile.new(:name => p)
-      @profiles << profile
-    }
+    if @profile.nil?
+      players = ["kithokit", "ringopak", "Team Cap", "yamsaihoi"]
+      @profiles = []
+      players.each { |p|
+        profile = Profile.new(p) rescue nil
+        @profiles << profile
+      }
+    end
     @profiles
   end
 end
